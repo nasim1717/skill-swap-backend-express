@@ -54,6 +54,26 @@ export const loginSchema = Joi.object({
             'string.min': 'Password must be at least 6 characters',
             'any.required': 'Password is required'
         })
-});
+}).unknown(true);
+
+export const updateProfileScema = Joi.object({
+    name: Joi.string().required().messages({
+        'string.empty': 'Name is required',
+        'string.base': 'Name must be a string',
+        'any.required': 'Name is required'
+    }),
+    location: Joi.string().required().messages({
+        'string.empty': 'Location is required',
+        'string.base': 'Location must be a string',
+        'any.required': 'Location is required'
+    }),
+    bio: Joi.string().required().messages({
+        'string.empty': 'Bio is required',
+        'string.base': 'Bio must be a string',
+        'any.required': 'Bio is required'
+    })
+}).unknown(true);
+
+
 
 
