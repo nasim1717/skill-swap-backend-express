@@ -14,7 +14,7 @@ export const authenticate = (req, res, next) => {
     try {
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-        if (req.method === "GET") {
+        if (req.method === "GET" || !req?.body) {
             req.user = decoded;
             return next();
         }

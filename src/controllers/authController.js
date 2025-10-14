@@ -3,11 +3,12 @@ import bcrypt from "bcryptjs";
 import { generateToken } from "../utils/generateToken.js";
 import { errorResponse, successResponse } from "../utils/apiResponse.js";
 import { reviewSummary } from "../utils/helperQuery.js";
+import { getUploadFilePath } from "../utils/helper.js";
 
 
 export const register = async (req, res) => {
     try {
-        const { name, email, password, } = req.body
+        const { name, email, password, } = req.body;
 
         const existingUser = await prisma.users.findUnique({ where: { email } });
         if (existingUser) return errorResponse(res, "User already exists", 400);
@@ -19,7 +20,10 @@ export const register = async (req, res) => {
 
         const access_token = generateToken({ email: user.email, user_id: user.id });
         const responseData = {
-            user,
+            user: {
+                ...user,
+                profile_picture: user?.profile_picture && `${getUploadFilePath(req)}${user.profile_picture}`,
+            },
             access_token
         }
 
@@ -46,7 +50,10 @@ export const login = async (req, res) => {
 
         const access_token = generateToken({ email: user.email, user_id: user.id });
         const responseData = {
-            user,
+            user: {
+                ...user,
+                profile_picture: user?.profile_picture && `${getUploadFilePath(req)}${user.profile_picture}`,
+            },
             access_token
         }
 
