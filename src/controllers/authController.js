@@ -11,7 +11,7 @@ export const register = async (req, res) => {
         const { name, email, password, } = req.body;
 
         const existingUser = await prisma.users.findUnique({ where: { email } });
-        if (existingUser) return errorResponse(res, "User already exists", 400);
+        if (existingUser) return errorResponse(res, "User already exists", 400, { email: "Email already exists" });
 
         const hashedPassword = await bcrypt.hash(password, 10);
         const user = await prisma.users.create({
@@ -43,10 +43,10 @@ export const login = async (req, res) => {
 
         const { email, password } = req.body
         const user = await prisma.users.findUnique({ where: { email } });
-        if (!user) return errorResponse(res, "User not found", 400);
+        if (!user) return errorResponse(res, "User not found", 400, { email: "User not found" });
 
         const validPassword = await bcrypt.compare(password, user.password);
-        if (!validPassword) return errorResponse(res, "Invalid password", 400);
+        if (!validPassword) return errorResponse(res, "Invalid password", 400, { password: "Invalid password" });
 
         const access_token = generateToken({ email: user.email, user_id: user.id });
         const responseData = {

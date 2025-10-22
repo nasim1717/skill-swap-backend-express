@@ -5,17 +5,17 @@ import { createOfferdSkiils, createWantedSkills, getOfferdSkiils, getWantedSkill
 import { updateProfileScema } from "../validations/userValidation.js";
 import { validate } from "../middlewares/validate.js";
 import { getUserProfile, updateProfile } from "../controllers/userController.js";
-import { createReviewSchema, offerdSkillsSchema, wantedSkillsSchema } from "../validations/skillsValidationl.js";
+import { createReviewSchema, } from "../validations/skillsValidationl.js";
 import { createReview, getReviewList } from "../controllers/reviewController.js";
 
 
 const router = express.Router();
 
 
-router.post("/offerd-skills", authenticate, validate(offerdSkillsSchema), createOfferdSkiils);
+router.post("/offerd-skills", authenticate, createOfferdSkiils);
 router.get("/offerd-skills", authenticate, getOfferdSkiils);
 
-router.post("/wanted-skills", authenticate, validate(wantedSkillsSchema), createWantedSkills);
+router.post("/wanted-skills", authenticate, createWantedSkills);
 router.get("/wanted-skills", authenticate, getWantedSkills);
 
 router.get("/profile/:id", authenticate, getUserProfile);
