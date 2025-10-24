@@ -16,6 +16,7 @@ export const uploadImage = async (req, res) => {
             },
         });
 
+
         const domain = getUploadFilePath(req);
         const imageUrl = `${domain}${req.file.filename}`;
 

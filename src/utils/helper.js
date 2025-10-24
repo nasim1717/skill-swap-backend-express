@@ -1,7 +1,7 @@
 import { format } from "date-fns";
 
 export const getUploadFilePath = (req) => {
-    return `$${req.protocol}://${req.get('host')}/uploads/`;
+    return `${req.protocol}://${req.get('host')}/uploads/`;
 
 };
 

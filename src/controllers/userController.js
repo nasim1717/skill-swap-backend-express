@@ -1,6 +1,6 @@
 import prisma from "../config/db.js";
 import { errorResponse, successResponse } from "../utils/apiResponse.js";
-import { formatDate } from "../utils/helper.js";
+import { formatDate, getUploadFilePath } from "../utils/helper.js";
 import { reviewSummary } from "../utils/helperQuery.js";
 
 export const updateProfile = async (req, res) => {
@@ -49,7 +49,7 @@ export const getUserProfile = async (req, res) => {
             id: user.id,
             name: user.name,
             email: user.email,
-            profile_picture: user.profile_picture,
+            profile_picture: getUploadFilePath(req) + user.profile_picture,
             bio: user.bio,
             location: user.location,
             created_at: formatDate(user.created_at, 'monthYear'),
