@@ -24,7 +24,7 @@ export const getReviewList = async (req, res) => {
     try {
         const data = await prisma.reviews.findMany({
             where: { reviewed_user_id: id },
-            select: { reviewed_user_id: true, rating: true, comment: true, created_at: true, id: true }
+            select: { reviewed_user_id: true, reviewer_id: true, rating: true, comment: true, created_at: true, id: true }
         });
         return successResponse(res, "Reviews fetched successfully", data, 200);
     } catch (error) {

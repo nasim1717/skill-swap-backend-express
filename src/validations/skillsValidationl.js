@@ -12,10 +12,12 @@ export const createReviewSchema = Joi.object({
 
         }),
 
-    rating: Joi.number().required().messages({
+    rating: Joi.number().required().max(5).min(1).messages({
         'number.empty': 'Rating is required',
         'number.base': 'Rating must be a number',
-        'any.required': 'Rating is required'
+        'any.required': 'Rating is required',
+        'number.max': 'Rating must be between 1 and 5',
+        'number.min': 'Rating must be between 1 and 5',
     }),
 
     comment: Joi.string().required().messages({
