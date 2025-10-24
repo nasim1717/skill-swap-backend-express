@@ -3,6 +3,7 @@ import cors from "cors";
 import authRoutes from "./routes/authRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
 import uploadRoute from "./routes/uploadRoute.js";
+import matchingRoute from "./routes/matchingRoute.js";
 import { errorHandler } from "./middlewares/errorHandler.js";
 import path from "path";
 const app = express();
@@ -19,6 +20,7 @@ app.get("/", (req, res) => {
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/upload", uploadRoute);
+app.use("/api/matches", matchingRoute);
 
 app.use(errorHandler);
 

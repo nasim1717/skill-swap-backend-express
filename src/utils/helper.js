@@ -27,3 +27,12 @@ export const formatDate = (date, formatType = "monthYear") => {
         return date;
     }
 };
+
+
+export const parseSkills = (skillsString) => {
+    if (!skillsString) return [];
+    return skillsString
+        .split(",")
+        .map((s) => s.trim().toLowerCase())
+        .filter(Boolean);
+};
