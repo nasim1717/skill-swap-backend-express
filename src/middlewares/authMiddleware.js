@@ -6,10 +6,11 @@ export const authenticate = (req, res, next) => {
     const authHeader = req.headers.authorization;
 
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
-
         return errorResponse(res, "Unauthorized User", 401);
     }
     const token = authHeader.split(" ")[1];
+
+
 
     try {
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
@@ -22,7 +23,7 @@ export const authenticate = (req, res, next) => {
         req.body.email = decoded?.email;
         next();
     } catch (error) {
-        console.log("error", error)
+        console.log("error-->", error)
         return errorResponse(res, "Unauthorized User", 401);
     }
 };

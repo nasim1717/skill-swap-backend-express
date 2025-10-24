@@ -25,6 +25,7 @@ export const getMatches = async (req, res) => {
             },
         });
 
+
         const matchedUsersPromises = otherUsers
             .map(async (user) => {
                 const skillsString = user.skills_offered[0]?.skills || "";
@@ -51,8 +52,8 @@ export const getMatches = async (req, res) => {
                     profile_picture: user.profile_picture,
                     location: user.location,
                     matched_skills: matchedSkills,
-                    skills_offered: user.skills_offered[0]?.skills,
-                    skills_wanted: user.skills_wanted[0]?.skills,
+                    skills_offered: user?.skills_offered[0]?.skills,
+                    skills_wanted: user?.skills_wanted[0]?.skills,
                     match_percent: parseFloat(matchPercent.toFixed(2)),
                     average_rating,
                 };
