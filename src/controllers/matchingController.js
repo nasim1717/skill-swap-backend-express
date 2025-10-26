@@ -1,6 +1,6 @@
 import prisma from "../config/db.js";
 import { errorResponse, successResponse } from "../utils/apiResponse.js";
-import { parseSkills } from "../utils/helper.js";
+import { getUploadFilePath, parseSkills } from "../utils/helper.js";
 import { reviewSummary } from "../utils/helperQuery.js";
 
 
@@ -10,7 +10,7 @@ export const getMatches = async (req, res) => {
         const loggedUserId = req.user.user_id;
         const loggedUserSkills = await prisma.skills_wanted.findUnique({ where: { user_id: loggedUserId } });
 
-        const userSkills = parseSkills(loggedUserSkills.skills);
+        const userSkills = parseSkills(loggedUserSkills?.skills);
 
         if (userSkills.length === 0) {
             return successResponse(res, "No matches found", { total_matches: 0, matched_users: [] }, 200);
@@ -49,7 +49,7 @@ export const getMatches = async (req, res) => {
                     id: user.id,
                     name: user.name,
                     email: user.email,
-                    profile_picture: user.profile_picture,
+                    profile_picture: user.profile_picture && `${getUploadFilePath(req)}${user.profile_picture}`,
                     location: user.location,
                     matched_skills: matchedSkills,
                     skills_offered: user?.skills_offered[0]?.skills,
