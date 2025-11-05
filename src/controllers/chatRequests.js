@@ -1,5 +1,6 @@
 import prisma from "../config/db.js";
 import { onlineUsers } from "../sockets/chat.js";
+import { getUploadFilePath } from "../utils/helper.js";
 
 async function sendRequest(req, res) {
     const senderId = req.body.user_id;
@@ -55,7 +56,6 @@ async function listRequests(req, res) {
 
         const enriched = await Promise.all(
             requests.map(async (reqItem) => {
-                // 👉 PENDING request শুধুমাত্র receiver দেখবে
                 if (reqItem.status === 'PENDING' && reqItem.receiver_id !== userId) {
                     return null;
                 }
@@ -81,7 +81,6 @@ async function listRequests(req, res) {
                 let unread_count = 0;
 
                 if (thread) {
-                    // 👈 Last message fetch করা
                     lastMessage = await prisma.messages.findFirst({
                         where: { thread_id: thread.id },
                         orderBy: { created_at: 'desc' },
@@ -116,22 +115,21 @@ async function listRequests(req, res) {
                     thread_id: thread?.id ? thread.id.toString() : null,
                     unread_count,
                     is_online: isOnline,
-                    // 👈 Last message add করা
                     last_message: lastMessage ? {
                         id: lastMessage.id.toString(),
                         message: lastMessage.message,
                         sender_id: lastMessage.sender_id.toString(),
                         created_at: lastMessage.created_at,
                         seen: lastMessage.seen,
-                        is_own: lastMessage.sender_id === userId, // আমার নিজের message কিনা
+                        is_own: lastMessage.sender_id === userId,
                     } : (reqItem.status === 'PENDING' ? {
-                        // 👈 যদি thread না থাকে, তাহলে request এর first message দেখাও
                         message: reqItem.message,
                         created_at: reqItem.created_at,
                         is_own: reqItem.sender_id === userId,
                     } : null),
                     user: {
                         ...otherUser,
+                        profile_picture: otherUser.profile_picture && getUploadFilePath(req) + otherUser.profile_picture,
                         id: otherUser.id.toString(),
                     },
                 };

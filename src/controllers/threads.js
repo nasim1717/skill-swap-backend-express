@@ -1,10 +1,4 @@
-
 import prisma from "../config/db.js";
-
-function canonical(a, b) {
-    const A = Number(a), B = Number(b);
-    return A < B ? [A, B] : [B, A];
-}
 
 async function listThreads(req, res) {
     const userId = req.user.id;
