@@ -5,6 +5,8 @@ import userRoutes from "./routes/userRoutes.js";
 import uploadRoute from "./routes/uploadRoute.js";
 import matchingRoute from "./routes/matchingRoute.js";
 import { errorHandler } from "./middlewares/errorHandler.js";
+import chatRequest from "./routes/chatRequests.js"
+import threadsRoutes from "./routes/threads.js"
 import path from "path";
 const app = express();
 
@@ -21,6 +23,11 @@ app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/upload", uploadRoute);
 app.use("/api/matches", matchingRoute);
+
+app.use('/api/chat-requests', chatRequest);
+app.use('/api/threads', threadsRoutes);
+
+
 
 app.use(errorHandler);
 

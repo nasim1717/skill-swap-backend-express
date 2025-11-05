@@ -8,6 +8,12 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum RequestStatus {
+  PENDING
+  ACCEPTED
+  DECLINED
+}
+
 model users {
   id              BigInt    @id @default(autoincrement()) @db.BigInt
   name            String?
@@ -26,6 +32,11 @@ model users {
   received_messages messages[]       @relation("received_messages")
   reviews_written   reviews[]        @relation("reviews_written")
   reviews_received  reviews[]        @relation("reviews_received")
+
+  sent_requests     chat_requests[] @relation("request_sender")
+  received_requests chat_requests[] @relation("request_receiver")
+  threads_as_a      chat_threads[]  @relation("participantA")
+  threads_as_b      chat_threads[]  @relation("participantB")
 
   @@map("users")
 }
@@ -63,16 +74,52 @@ model messages {
   sender_id   BigInt
   receiver_id BigInt
   message     String    @db.Text
+  thread_id   BigInt? // optional link to chat thread
+  seen        Boolean   @default(false)
   created_at  DateTime  @default(now())
   updated_at  DateTime? @updatedAt
 
   // relations
-  sender   users @relation("sent_messages", fields: [sender_id], references: [id], onDelete: Cascade)
-  receiver users @relation("received_messages", fields: [receiver_id], references: [id], onDelete: Cascade)
+  sender   users         @relation("sent_messages", fields: [sender_id], references: [id], onDelete: Cascade)
+  receiver users         @relation("received_messages", fields: [receiver_id], references: [id], onDelete: Cascade)
+  thread   chat_threads? @relation(fields: [thread_id], references: [id], onDelete: Cascade)
 
   @@index([sender_id])
   @@index([receiver_id])
+  @@index([thread_id])
   @@map("messages")
+}
+
+model chat_requests {
+  id          BigInt        @id @default(autoincrement()) @db.BigInt
+  sender_id   BigInt
+  receiver_id BigInt
+  status      RequestStatus @default(PENDING)
+  message     String?       @db.Text
+  created_at  DateTime      @default(now())
+  updated_at  DateTime?     @updatedAt
+
+  sender   users @relation("request_sender", fields: [sender_id], references: [id], onDelete: Cascade)
+  receiver users @relation("request_receiver", fields: [receiver_id], references: [id], onDelete: Cascade)
+
+  @@index([sender_id])
+  @@index([receiver_id])
+  @@map("chat_requests")
+}
+
+model chat_threads {
+  id            BigInt   @id @default(autoincrement()) @db.BigInt
+  participant_a BigInt
+  participant_b BigInt
+  created_at    DateTime @default(now())
+
+  participantA users @relation("participantA", fields: [participant_a], references: [id], onDelete: Cascade)
+  participantB users @relation("participantB", fields: [participant_b], references: [id], onDelete: Cascade)
+
+  messages messages[]
+
+  @@unique([participant_a, participant_b])
+  @@map("chat_threads")
 }
 
 model reviews {
