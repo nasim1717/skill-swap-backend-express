@@ -13,7 +13,6 @@ async function sendRequest(req, res) {
         where: {
             sender_id: senderId,
             receiver_id: receiver_id,
-            status: 'PENDING',
         },
     });
     if (existing) return res.status(409).json({ error: 'Pending request already exists' });
