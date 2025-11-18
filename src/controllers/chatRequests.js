@@ -4,36 +4,45 @@ import { getUploadFilePath } from "../utils/helper.js";
 
 async function sendRequest(req, res) {
     const senderId = req.body.user_id;
-    const { receiver_id, message } = req.body;
-    if (!receiver_id) return res.status(400).json({ error: 'receiver_id required' });
-    if (receiver_id === senderId) return res.status(400).json({ error: 'cannot send request to yourself' });
+    const receiverId = req.body.receiver_id;
+    const message = req.body.message;
 
-    // Prevent duplicate pending request
+    if (!receiverId) {
+        return res.status(400).json({ error: 'receiver_id required' });
+    }
+
+    if (receiverId === senderId) {
+        return res.status(400).json({ error: 'cannot send request to yourself' });
+    }
+
     const existing = await prisma.chat_requests.findFirst({
         where: {
-            sender_id: senderId,
-            receiver_id: receiver_id,
-        },
+            OR: [
+                { sender_id: senderId, receiver_id: receiverId },
+                { sender_id: receiverId, receiver_id: senderId }
+            ]
+        }
     });
-    if (existing) return res.status(409).json({ error: 'Pending request already exists' });
 
-    console.log("req.body-->", req.body)
+    if (existing) {
+        return res.status(409).json({ error: 'Request already exists between these users' });
+    }
 
     const created = await prisma.chat_requests.create({
         data: {
             sender_id: senderId,
-            receiver_id,
-            message,
-        },
+            receiver_id: receiverId,
+            message
+        }
     });
 
-    // you should emit a socket event to notify receiver (handled by socket server)
     return res.status(201).json({ data: created });
 }
 
+
 async function listRequests(req, res) {
     try {
-        const userId = BigInt(req.user.user_id);
+        const userId = req.user.user_id;
         const status = (req.query.status || 'ALL').toUpperCase();
 
         const where = {
@@ -156,8 +165,8 @@ async function listRequests(req, res) {
 
 async function acceptRequest(req, res) {
 
-    const userId = BigInt(req.user.user_id);
-    const requestId = BigInt(req.params.id);
+    const userId = req.user.user_id;
+    const requestId = req.params.id;
 
     const request = await prisma.chat_requests.findUnique({ where: { id: requestId } });
     if (!request) return res.status(404).json({ error: 'Request not found' });
@@ -195,8 +204,8 @@ async function acceptRequest(req, res) {
 }
 
 async function declineRequest(req, res) {
-    const userId = BigInt(req.user.user_id);
-    const requestId = BigInt(req.params.id);
+    const userId = req.user.user_id;
+    const requestId = req.params.id;
     const request = await prisma.chat_requests.findUnique({ where: { id: requestId } });
     if (!request) return res.status(404).json({ error: 'Request not found' });
     if (request.receiver_id !== userId) return res.status(403).json({ error: 'Not allowed' });

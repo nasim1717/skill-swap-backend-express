@@ -5,9 +5,6 @@ import initChatSocket from "./src/sockets/chat.js"
 const PORT = process.env.PORT || 5051;
 
 
-BigInt.prototype.toJSON = function () {
-    return this.toString();
-};
 
 const server = http.createServer(app);
 

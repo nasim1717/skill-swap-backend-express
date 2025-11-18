@@ -1,6 +1,5 @@
 generator client {
   provider = "prisma-client-js"
-  // output   = "../generated/prisma"
 }
 
 datasource db {
@@ -15,7 +14,7 @@ enum RequestStatus {
 }
 
 model users {
-  id              BigInt    @id @default(autoincrement()) @db.BigInt
+  id              Int       @id @default(autoincrement())
   name            String?
   email           String    @unique
   password        String
@@ -25,7 +24,6 @@ model users {
   created_at      DateTime  @default(now())
   updated_at      DateTime? @updatedAt
 
-  // relations
   skills_offered    skills_offered[]
   skills_wanted     skills_wanted[]
   sent_messages     messages[]       @relation("sent_messages")
@@ -42,13 +40,12 @@ model users {
 }
 
 model skills_offered {
-  id         BigInt    @id @default(autoincrement()) @db.BigInt
-  user_id    BigInt    @unique
+  id         Int       @id @default(autoincrement())
+  user_id    Int       @unique
   skills     String
   created_at DateTime  @default(now())
   updated_at DateTime? @updatedAt
 
-  // relation fields
   user users @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
   @@index([user_id])
@@ -56,13 +53,12 @@ model skills_offered {
 }
 
 model skills_wanted {
-  id         BigInt    @id @default(autoincrement()) @db.BigInt
-  user_id    BigInt    @unique
+  id         Int       @id @default(autoincrement())
+  user_id    Int       @unique
   skills     String
   created_at DateTime  @default(now())
   updated_at DateTime? @updatedAt
 
-  // relation fields
   user users @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
   @@index([user_id])
@@ -70,16 +66,15 @@ model skills_wanted {
 }
 
 model messages {
-  id          BigInt    @id @default(autoincrement()) @db.BigInt
-  sender_id   BigInt
-  receiver_id BigInt
+  id          Int       @id @default(autoincrement())
+  sender_id   Int
+  receiver_id Int
   message     String    @db.Text
-  thread_id   BigInt? // optional link to chat thread
+  thread_id   Int?
   seen        Boolean   @default(false)
   created_at  DateTime  @default(now())
   updated_at  DateTime? @updatedAt
 
-  // relations
   sender   users         @relation("sent_messages", fields: [sender_id], references: [id], onDelete: Cascade)
   receiver users         @relation("received_messages", fields: [receiver_id], references: [id], onDelete: Cascade)
   thread   chat_threads? @relation(fields: [thread_id], references: [id], onDelete: Cascade)
@@ -91,9 +86,9 @@ model messages {
 }
 
 model chat_requests {
-  id          BigInt        @id @default(autoincrement()) @db.BigInt
-  sender_id   BigInt
-  receiver_id BigInt
+  id          Int           @id @default(autoincrement())
+  sender_id   Int
+  receiver_id Int
   status      RequestStatus @default(PENDING)
   message     String?       @db.Text
   created_at  DateTime      @default(now())
@@ -108,9 +103,9 @@ model chat_requests {
 }
 
 model chat_threads {
-  id            BigInt   @id @default(autoincrement()) @db.BigInt
-  participant_a BigInt
-  participant_b BigInt
+  id            Int      @id @default(autoincrement())
+  participant_a Int
+  participant_b Int
   created_at    DateTime @default(now())
 
   participantA users @relation("participantA", fields: [participant_a], references: [id], onDelete: Cascade)
@@ -123,15 +118,14 @@ model chat_threads {
 }
 
 model reviews {
-  id               BigInt    @id @default(autoincrement()) @db.BigInt
-  reviewer_id      BigInt
-  reviewed_user_id BigInt
+  id               Int       @id @default(autoincrement())
+  reviewer_id      Int
+  reviewed_user_id Int
   rating           Int       @db.TinyInt
   comment          String?   @db.Text
   created_at       DateTime  @default(now())
   updated_at       DateTime? @updatedAt
 
-  // relations
   reviewer users @relation("reviews_written", fields: [reviewer_id], references: [id], onDelete: Cascade)
   reviewed users @relation("reviews_received", fields: [reviewed_user_id], references: [id], onDelete: Cascade)
 

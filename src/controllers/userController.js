@@ -20,7 +20,7 @@ export const updateProfile = async (req, res) => {
 
 export const getUserProfile = async (req, res) => {
     try {
-        const userId = BigInt(req.params.id);
+        const userId = req.params.id;
 
         const user = await prisma.users.findUnique({
             where: { id: userId },

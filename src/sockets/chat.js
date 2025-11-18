@@ -15,7 +15,7 @@ function initSocket(io) {
             if (!userId) return socket.disconnect();
 
             //  Store as string for consistent comparison
-            socket.userId = BigInt(userId);
+            socket.userId = userId;
             socket.join(`user_${socket.userId}`);
 
             //  Mark user as online (store as string key)
@@ -42,13 +42,13 @@ function initSocket(io) {
             if (!message || !threadId) return socket.emit('error', 'invalid payload');
 
             const thread = await prisma.chat_threads.findUnique({
-                where: { id: BigInt(threadId) }
+                where: { id: threadId }
             });
 
             if (!thread) return socket.emit('error', 'thread not found');
 
             // Convert to numbers for comparison
-            const userIdNum = BigInt(socket.userId);
+            const userIdNum = socket.userId;
             if (![thread.participant_a, thread.participant_b].includes(userIdNum)) {
                 return socket.emit('error', 'not participant');
             }
@@ -62,7 +62,7 @@ function initSocket(io) {
                     sender_id: userIdNum,
                     receiver_id: receiverId,
                     message,
-                    thread_id: BigInt(threadId),
+                    thread_id: threadId,
                 }
             });
 
@@ -77,7 +77,7 @@ function initSocket(io) {
 
             //  Notify receiver's personal room (for notification/badge update)
             io.to(`user_${receiverId}`).emit('incoming_message', {
-                threadId: Number(threadId),
+                threadId: threadId,
                 message: {
                     ...created,
                     id: created.id,
@@ -94,21 +94,21 @@ function initSocket(io) {
             if (!socket.userId) return;
 
             const msg = await prisma.messages.findUnique({
-                where: { id: BigInt(messageId) }
+                where: { id: messageId }
             });
 
             if (!msg) return;
-            if (msg.receiver_id !== BigInt(socket.userId)) return;
+            if (msg.receiver_id !== userIdNum) return;
             if (msg.seen) return; // Already seen, skip
 
             await prisma.messages.update({
-                where: { id: BigInt(messageId) },
+                where: { id: messageId },
                 data: { seen: true },
             });
 
             // Notify sender that message was seen
             io.to(`user_${msg.sender_id}`).emit('message_seen', {
-                messageId: BigInt(messageId),
+                messageId: messageId,
                 threadId: msg.thread_id
             });
 
@@ -120,12 +120,12 @@ function initSocket(io) {
             if (!socket.userId) return;
             if (!threadId) return;
 
-            const userIdNum = BigInt(socket.userId);
+            const userIdNum = socket.userId;
 
             // Find all unseen messages for this user in this thread
             const unseenMessages = await prisma.messages.findMany({
                 where: {
-                    thread_id: BigInt(threadId),
+                    thread_id: threadId,
                     receiver_id: userIdNum,
                     seen: false,
                 }
@@ -136,7 +136,7 @@ function initSocket(io) {
             // Mark all as seen
             await prisma.messages.updateMany({
                 where: {
-                    thread_id: BigInt(threadId),
+                    thread_id: threadId,
                     receiver_id: userIdNum,
                     seen: false,
                 },
@@ -147,7 +147,7 @@ function initSocket(io) {
 
             // Get the sender (other participant)
             const thread = await prisma.chat_threads.findUnique({
-                where: { id: BigInt(threadId) }
+                where: { id: threadId }
             });
 
             if (thread) {
@@ -157,7 +157,7 @@ function initSocket(io) {
 
                 // Notify sender that all messages were seen
                 io.to(`user_${senderId}`).emit('messages_seen', {
-                    threadId: BigInt(threadId),
+                    threadId: threadId,
                     count: unseenMessages.length
                 });
             }

@@ -23,8 +23,8 @@ async function listThreads(req, res) {
 }
 
 async function getMessages(req, res) {
-    const userId = BigInt(req.user.user_id);
-    const threadId = BigInt(req.params.id);
+    const userId = req.user.id;
+    const threadId = req.params.id;
 
     const thread = await prisma.chat_threads.findUnique({
         where: { id: threadId },
