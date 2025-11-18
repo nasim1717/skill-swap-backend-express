@@ -3,8 +3,9 @@ import { onlineUsers } from "../sockets/chat.js";
 import { getUploadFilePath } from "../utils/helper.js";
 
 async function sendRequest(req, res) {
-    const senderId = req.body.user_id;
-    const receiverId = req.body.receiver_id;
+    console.log("req.body.user_id-->", req.body.user_id);
+    const senderId = Number(req.body.user_id);
+    const receiverId = Number(req.body.receiver_id);
     const message = req.body.message;
 
     if (!receiverId) {
@@ -35,6 +36,8 @@ async function sendRequest(req, res) {
             message
         }
     });
+
+    console.log("sendRequest-->", created);
 
     return res.status(201).json({ data: created });
 }
@@ -117,16 +120,16 @@ async function listRequests(req, res) {
                 const isOnline = onlineUsers.has(otherUser.id);
 
                 return {
-                    id: reqItem.id.toString(),
+                    id: reqItem.id,
                     status: reqItem.status,
                     created_at: reqItem.created_at,
-                    thread_id: thread?.id ? thread.id.toString() : null,
+                    thread_id: thread?.id ? thread.id : null,
                     unread_count,
                     is_online: isOnline,
                     last_message: lastMessage ? {
-                        id: lastMessage.id.toString(),
+                        id: lastMessage.id,
                         message: lastMessage.message,
-                        sender_id: lastMessage.sender_id.toString(),
+                        sender_id: lastMessage.sender_id,
                         created_at: lastMessage.created_at,
                         seen: lastMessage.seen,
                         is_own: lastMessage.sender_id === userId,
@@ -138,7 +141,7 @@ async function listRequests(req, res) {
                     user: {
                         ...otherUser,
                         profile_picture: otherUser.profile_picture && getUploadFilePath(req) + otherUser.profile_picture,
-                        id: otherUser.id.toString(),
+                        id: otherUser.id,
                     },
                 };
             })
@@ -165,10 +168,15 @@ async function listRequests(req, res) {
 
 async function acceptRequest(req, res) {
 
+    // console.log("request id-->", req.params.id);
+
     const userId = req.user.user_id;
-    const requestId = req.params.id;
+    const requestId = Number(req.params.id);
+
+
 
     const request = await prisma.chat_requests.findUnique({ where: { id: requestId } });
+
     if (!request) return res.status(404).json({ error: 'Request not found' });
     if (request.receiver_id !== userId) return res.status(403).json({ error: 'Not allowed' });
     if (request.status !== 'PENDING') return res.status(400).json({ error: 'Request not pending' });
@@ -198,6 +206,8 @@ async function acceptRequest(req, res) {
         where: { id: requestId },
         data: { status: 'ACCEPTED' },
     });
+
+    console.log("acceptRequest-->", { data: { request: updated, thread } });
 
     // Optionally: connect the request to thread via custom column (not in schema) or just return thread
     res.json({ data: { request: updated, thread } });

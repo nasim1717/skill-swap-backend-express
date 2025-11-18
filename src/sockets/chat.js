@@ -8,7 +8,7 @@ export const onlineUsers = new Map();
 
 function initSocket(io) {
     io.on('connection', (socket) => {
-        console.log('🟢 New socket connected:', socket.id);
+        console.log('New socket connected:', socket.id);
 
         // When client authenticates
         socket.on('authenticate', async ({ userId }) => {
@@ -20,7 +20,7 @@ function initSocket(io) {
 
             //  Mark user as online (store as string key)
             onlineUsers.set(socket.userId, socket.id);
-            console.log(`✅ User ${socket.userId} connected. Online users:`, Array.from(onlineUsers.keys()));
+            console.log(`User ${socket.userId} connected. Online users:`, Array.from(onlineUsers.keys()));
 
             //  Broadcast to all connected clients
             io.emit('user_status_change', {
@@ -89,7 +89,7 @@ function initSocket(io) {
             console.log(`Message sent from ${socket.userId} to ${receiverId} in thread ${threadId}`);
         });
 
-        // ✅ Mark message as seen
+        // Mark message as seen
         socket.on('mark_seen', async ({ messageId }) => {
             if (!socket.userId) return;
 
@@ -181,7 +181,7 @@ function initSocket(io) {
         socket.on('disconnect', () => {
             if (socket.userId) {
                 onlineUsers.delete(socket.userId);
-                console.log(`🔴 User ${socket.userId} disconnected. Online users:`, Array.from(onlineUsers.keys()));
+                console.log(`User ${socket.userId} disconnected. Online users:`, Array.from(onlineUsers.keys()));
 
                 // Broadcast to all connected clients
                 io.emit('user_status_change', {
